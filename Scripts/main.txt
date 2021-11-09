@@ -1,0 +1,47 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:03d8daf2d7c71118615976170b29cae71d662dde7e5da5f997c4a143558d37bc
+size 1138
+=======
+extends Node
+
+# Experimental start position
+#const START_POSITION =  Vector2(7989.37, 16145)
+
+const START_POSITION = Vector2(1250, 12215)
+var once = true
+var checkpoint_position = START_POSITION
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	$player.position = START_POSITION
+
+# Resets player position to last checkpoint touched
+func checkpoint_restart():
+	$player.position = checkpoint_position
+
+# Runs code inside when player restart signal is receives
+func _on_player_restart():
+	checkpoint_restart()
+
+# This receives the entered signal from the checkpoint, and runs the code inside
+func _on_checkpoint_entered():
+	checkpoint_position = $player.position
+
+
+# When the boss arena is entered:
+# block off exit, set camera state, and play sounds
+func _on_boss_area_body_entered(body):
+	if body.get_name() == 'player':
+		if once:
+			$boss_area/AudioStreamPlayer.playing = true
+			$boss_area/Label.show()
+			$main_music.stop()
+			$base_block_gray_map.set_cell(45, 36, 0)
+			$base_block_gray_map.set_cell(45, 37, 0)
+			$base_block_gray_map.set_cell(45, 38, 0)
+		$boss_camera.current = true
+		once = false
+
+
+>>>>>>> 013b03bb54454b500a19cf0c01c2cd590ce3264c

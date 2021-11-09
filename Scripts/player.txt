@@ -1,0 +1,150 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:7f6967e3b451efe502dad67289a54aa907231dd49c853fa490494de156e4c735
+size 3924
+=======
+extends KinematicBody2D
+
+# Declare member constants here. 
+const ACCELERATION = 1500
+const FRICTION = -500
+const GRAVITY = 1000
+const MIN_SPEED = -650
+const MAX_SPEED = 650
+const JUMP_SPEED = -650
+const MIN_JUMP_SPEED = -150
+const WALL_JUMP_SPEED = -470
+const WALL_JUMP_SIDEWAYS_SPEED = 800
+
+# Declare member variables here
+signal fall_through_platform
+signal restart
+var collision
+var normal
+var wall_jump = false
+var can_jump = 0
+var accel = Vector2()
+var velocity = Vector2()
+var move_left
+var move_right
+var min_speed 
+var double_jump_reset
+var falling = false
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	
+	# Short hopping 
+	if Input.is_action_just_released("ui_spacebar"):
+		if velocity.y < MIN_JUMP_SPEED:
+			velocity.y = MIN_JUMP_SPEED
+		
+	# Animation control
+	if !collision and velocity.y != 0:
+		$sprite_anim.animation = 'falling'
+		falling = true
+	elif Input.is_action_pressed("ui_down"):
+		$sprite_anim.animation = 'teabag'
+	elif Input.is_action_just_released("ui_down"):
+		$sprite_anim.animation = 'idle'
+		$sprite_anim.frame = 1
+	elif move_right == 1:
+		$sprite_anim.animation = "right"
+		falling = false
+	elif move_left == 1:
+		$sprite_anim.animation = "left"
+		falling = false
+	elif move_right - move_left == 0:
+		if falling:
+			$sprite_anim.animation = "teabag"
+			yield(get_tree().create_timer(0.75), "timeout")
+			falling = false
+		if !falling:
+			$sprite_anim.animation = "idle"
+
+
+# Called independently of framerate, used for physics
+func _physics_process(delta):
+	
+	# Gravity is always affecting acceleration
+	accel.y = GRAVITY
+	
+	# Input
+	if Input.is_action_just_pressed("ui_spacebar"):
+		if can_jump > 0:
+			jump()
+	if Input.is_action_pressed("ui_right"):
+		move_right = 1
+	else:
+		move_right = 0
+	if Input.is_action_pressed("ui_left"):
+		move_left = 1
+	else:
+		move_left = 0
+	
+	# Simple movement that equals -1, 0, or 1 for left, neutral, or right
+	accel.x = (move_right - move_left) *  ACCELERATION
+	if accel.x == 0:
+		# Applies friction (slows down) if player inputs nothing
+		accel.x = velocity.x * FRICTION * delta
+	
+	# Adding acceleration to velocity, much like it works in real life
+	velocity += accel * delta
+	
+	# Clamping values between a certain range
+	velocity.x = clamp(velocity.x, MIN_SPEED, MAX_SPEED)
+	velocity.y = clamp(velocity.y, JUMP_SPEED, GRAVITY)
+	
+	# Moves until collision, returns collision information onto variable
+	collision = move_and_collide(velocity * delta)
+	
+	# Handles what happens when there is a collision
+	if collision: # If there is collision info
+		if Input.is_action_pressed("ui_down"):
+			emit_signal('fall_through_platform', collision)
+		if collision.collider.get_name() == 'death_block':
+			emit_signal('restart')
+		normal = collision.normal
+		if collision.collider.get_name() == 'base_block_gray_platform':
+			if Input.is_action_pressed("ui_up"):
+				if normal == Vector2(0, 1):
+					position.y -= 200
+			if Input.is_action_pressed("ui_down"):
+				position.y += 60
+		if normal == Vector2(0, -1):
+			can_jump = 2
+			wall_jump = false
+		elif normal == Vector2(-1, 0) or normal == Vector2(1, 0):
+			wall_jump = true
+			can_jump = 1
+			velocity.y /= 1.25
+		velocity = velocity.slide(normal)
+		move_and_slide(velocity)
+
+# Handles what happens when jump key is pressed
+# Handles normal jumps and wall jumps	
+func jump():
+	double_jump_reset = true
+	if wall_jump:
+		velocity.y = WALL_JUMP_SPEED
+		if normal == Vector2(-1, 0):
+			velocity.x = -WALL_JUMP_SIDEWAYS_SPEED
+		elif normal == Vector2(1, 0):
+			velocity.x = WALL_JUMP_SIDEWAYS_SPEED
+		can_jump -= 1
+	if !wall_jump:
+		if can_jump == 1:
+			if move_right == 1 and velocity.x > 0:
+				double_jump_reset = false
+			if move_left == 1 and velocity.x < 0:
+				double_jump_reset = false
+			if double_jump_reset:
+				velocity.x = 0
+		can_jump -= 1
+		velocity.y = JUMP_SPEED
+	
+>>>>>>> 013b03bb54454b500a19cf0c01c2cd590ce3264c

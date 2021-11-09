@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:405c701d5ded52bbeeda86a28b8b3ee8d69c6865a9a927a27395b06d39438480
+size 229
+=======
+extends Area2D
+
+signal entered 
+
+# When the collision area is entered, and if what entered was the player, emit the signal entered
+func _on_checkpoint_body_entered(body):
+	if body.get_name() == "player":
+		emit_signal("entered")
+>>>>>>> 013b03bb54454b500a19cf0c01c2cd590ce3264c

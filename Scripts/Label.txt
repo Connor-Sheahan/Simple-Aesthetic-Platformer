@@ -1,0 +1,13 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:4b534dfaf88b47135fb623a4c6391d7d196bcd96d58a5658327aa182cdbae331
+size 106
+=======
+extends Label
+ 
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	hide()
+
+>>>>>>> 013b03bb54454b500a19cf0c01c2cd590ce3264c
