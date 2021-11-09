@@ -1,3 +1,3 @@
 # Simple Platformer
 
-![title image](image.png}
+! [title image](image.png}
