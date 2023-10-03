@@ -1,4 +1,4 @@
-# Simple Platformer
+# Simple Aesthetic Platformer
 
 A small, completely original game that I coded in Godot, using GDScript, for a grade 11 school project.
 
